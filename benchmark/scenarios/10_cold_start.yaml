@@ -1,0 +1,14 @@
+id: s10_cold_start
+title: "Cold-start — empty memory should not break the agent"
+category: robustness
+sessions:
+  - - turn_idx: 0
+      user: "Hello, can you help me with something?"
+      expected_signals: []
+      negative_signals:
+        - "I don't know"
+    - turn_idx: 1
+      user: "Which language should I use for a tiny script?"
+      expected_signals: []
+      negative_signals: []
+notes: "Control scenario — no memory content exists. With-mem and no-mem should both produce sane output."

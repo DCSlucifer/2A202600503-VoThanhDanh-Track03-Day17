@@ -1,0 +1,305 @@
+{
+  "run_id": "run_20260424_121031_fb4011",
+  "scenarios": [
+    {
+      "id": "s01_pref_same_session",
+      "with_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.1164,
+        "token_efficiency": 12.037,
+        "memory_hit_rate": 0.5,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 2.0,
+        "prompt_tokens_total": 195.0,
+        "completion_tokens_total": 46.0
+      },
+      "no_mem": {
+        "response_relevance": 0.75,
+        "context_utilization": 0.0,
+        "token_efficiency": 11.1111,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.85,
+        "turns": 2.0,
+        "prompt_tokens_total": 150.0,
+        "completion_tokens_total": 30.0
+      },
+      "deltas": {
+        "response_relevance": 0.25,
+        "context_utilization": 0.1164,
+        "token_efficiency": 0.9259,
+        "memory_hit_rate": 0.5,
+        "user_satisfaction_proxy": 0.15
+      }
+    },
+    {
+      "id": "s02_pref_cross_session",
+      "with_mem": {
+        "response_relevance": 0.6667,
+        "context_utilization": 0.1395,
+        "token_efficiency": 7.3979,
+        "memory_hit_rate": 0.3333,
+        "user_satisfaction_proxy": 0.8,
+        "turns": 3.0,
+        "prompt_tokens_total": 339.0,
+        "completion_tokens_total": 77.0
+      },
+      "no_mem": {
+        "response_relevance": 0.5,
+        "context_utilization": 0.0,
+        "token_efficiency": 7.7387,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.7,
+        "turns": 3.0,
+        "prompt_tokens_total": 229.0,
+        "completion_tokens_total": 47.0
+      },
+      "deltas": {
+        "response_relevance": 0.1667,
+        "context_utilization": 0.1395,
+        "token_efficiency": -0.3408,
+        "memory_hit_rate": 0.3333,
+        "user_satisfaction_proxy": 0.1
+      }
+    },
+    {
+      "id": "s03_pref_contradiction",
+      "with_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.1013,
+        "token_efficiency": 13.6501,
+        "memory_hit_rate": 0.3333,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 3.0,
+        "prompt_tokens_total": 260.0,
+        "completion_tokens_total": 30.0
+      },
+      "no_mem": {
+        "response_relevance": 0.6667,
+        "context_utilization": 0.0,
+        "token_efficiency": 11.3027,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.8,
+        "turns": 3.0,
+        "prompt_tokens_total": 203.0,
+        "completion_tokens_total": 39.0
+      },
+      "deltas": {
+        "response_relevance": 0.3333,
+        "context_utilization": 0.1013,
+        "token_efficiency": 2.3474,
+        "memory_hit_rate": 0.3333,
+        "user_satisfaction_proxy": 0.2
+      }
+    },
+    {
+      "id": "s04_fact_profile",
+      "with_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.0772,
+        "token_efficiency": 11.5298,
+        "memory_hit_rate": 0.3333,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 3.0,
+        "prompt_tokens_total": 288.0,
+        "completion_tokens_total": 28.0
+      },
+      "no_mem": {
+        "response_relevance": 0.6667,
+        "context_utilization": 0.0,
+        "token_efficiency": 9.1657,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.8,
+        "turns": 3.0,
+        "prompt_tokens_total": 256.0,
+        "completion_tokens_total": 36.0
+      },
+      "deltas": {
+        "response_relevance": 0.3333,
+        "context_utilization": 0.0772,
+        "token_efficiency": 2.3641,
+        "memory_hit_rate": 0.3333,
+        "user_satisfaction_proxy": 0.2
+      }
+    },
+    {
+      "id": "s05_fact_technical",
+      "with_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.1802,
+        "token_efficiency": 13.0386,
+        "memory_hit_rate": 0.5,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 2.0,
+        "prompt_tokens_total": 161.0,
+        "completion_tokens_total": 20.0
+      },
+      "no_mem": {
+        "response_relevance": 0.5,
+        "context_utilization": 0.0,
+        "token_efficiency": 7.9365,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.7,
+        "turns": 2.0,
+        "prompt_tokens_total": 125.0,
+        "completion_tokens_total": 26.0
+      },
+      "deltas": {
+        "response_relevance": 0.5,
+        "context_utilization": 0.1802,
+        "token_efficiency": 5.1021,
+        "memory_hit_rate": 0.5,
+        "user_satisfaction_proxy": 0.3
+      }
+    },
+    {
+      "id": "s06_episodic_adaptation",
+      "with_mem": {
+        "response_relevance": 0.5,
+        "context_utilization": 0.2907,
+        "token_efficiency": 3.4722,
+        "memory_hit_rate": 0.5,
+        "user_satisfaction_proxy": 0.7,
+        "turns": 2.0,
+        "prompt_tokens_total": 213.0,
+        "completion_tokens_total": 82.0
+      },
+      "no_mem": {
+        "response_relevance": 0.0,
+        "context_utilization": 0.0,
+        "token_efficiency": 0.0,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.4,
+        "turns": 2.0,
+        "prompt_tokens_total": 129.0,
+        "completion_tokens_total": 39.0
+      },
+      "deltas": {
+        "response_relevance": 0.5,
+        "context_utilization": 0.2907,
+        "token_efficiency": 3.4722,
+        "memory_hit_rate": 0.5,
+        "user_satisfaction_proxy": 0.3
+      }
+    },
+    {
+      "id": "s07_ambiguous_multi",
+      "with_mem": {
+        "response_relevance": 0.6667,
+        "context_utilization": 0.0,
+        "token_efficiency": 9.4315,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.8,
+        "turns": 3.0,
+        "prompt_tokens_total": 212.0,
+        "completion_tokens_total": 34.0
+      },
+      "no_mem": {
+        "response_relevance": 0.6667,
+        "context_utilization": 0.0,
+        "token_efficiency": 9.4315,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.8,
+        "turns": 3.0,
+        "prompt_tokens_total": 212.0,
+        "completion_tokens_total": 34.0
+      },
+      "deltas": {
+        "response_relevance": 0.0,
+        "context_utilization": 0.0,
+        "token_efficiency": 0.0,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.0
+      }
+    },
+    {
+      "id": "s08_precision",
+      "with_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.0,
+        "token_efficiency": 16.6667,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 2.0,
+        "prompt_tokens_total": 120.0,
+        "completion_tokens_total": 24.0
+      },
+      "no_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.0,
+        "token_efficiency": 16.6667,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 2.0,
+        "prompt_tokens_total": 120.0,
+        "completion_tokens_total": 24.0
+      },
+      "deltas": {
+        "response_relevance": 0.0,
+        "context_utilization": 0.0,
+        "token_efficiency": 0.0,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.0
+      }
+    },
+    {
+      "id": "s09_long_trim",
+      "with_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.0119,
+        "token_efficiency": 7.4371,
+        "memory_hit_rate": 0.1,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 10.0,
+        "prompt_tokens_total": 1617.0,
+        "completion_tokens_total": 148.0
+      },
+      "no_mem": {
+        "response_relevance": 0.9,
+        "context_utilization": 0.0,
+        "token_efficiency": 7.0403,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.94,
+        "turns": 10.0,
+        "prompt_tokens_total": 1571.0,
+        "completion_tokens_total": 132.0
+      },
+      "deltas": {
+        "response_relevance": 0.1,
+        "context_utilization": 0.0119,
+        "token_efficiency": 0.3968,
+        "memory_hit_rate": 0.1,
+        "user_satisfaction_proxy": 0.06
+      }
+    },
+    {
+      "id": "s10_cold_start",
+      "with_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.0,
+        "token_efficiency": 13.4598,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 2.0,
+        "prompt_tokens_total": 156.0,
+        "completion_tokens_total": 37.0
+      },
+      "no_mem": {
+        "response_relevance": 1.0,
+        "context_utilization": 0.0,
+        "token_efficiency": 13.4598,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 1.0,
+        "turns": 2.0,
+        "prompt_tokens_total": 156.0,
+        "completion_tokens_total": 37.0
+      },
+      "deltas": {
+        "response_relevance": 0.0,
+        "context_utilization": 0.0,
+        "token_efficiency": 0.0,
+        "memory_hit_rate": 0.0,
+        "user_satisfaction_proxy": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+id: s03_pref_contradiction
+title: "Preference contradiction / update (conflict resolver)"
+category: preference
+sessions:
+  - - turn_idx: 0
+      user: "Tôi thích Python."
+      expected_signals:
+        - "noting that preference"
+  - - turn_idx: 0
+      user: "Actually I prefer Rust now."
+      expected_signals:
+        - "noting that preference"
+    - turn_idx: 1
+      user: "Which language should I use for a CLI tool?"
+      expected_signals:
+        - "Rust"
+      negative_signals:
+        - "Python"
+oracle_preferences:
+  "language.liked": "rust"
+notes: "After the user flips, newer preference must win — older entry moves to history."

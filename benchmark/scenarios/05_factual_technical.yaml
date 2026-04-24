@@ -1,0 +1,17 @@
+id: s05_fact_technical
+title: "Factual recall - technical stack"
+category: factual
+sessions:
+  - - turn_idx: 0
+      user: "I'm using Postgres 15 for this project."
+      expected_signals:
+        - "noting that fact"
+  - - turn_idx: 0
+      user: "Remind me what database version I'm using?"
+      expected_signals:
+        - "Postgres 15"
+      negative_signals:
+        - "I don't know"
+oracle_facts:
+  "profile.stack": "Postgres 15 for this project"
+notes: "Second profile fact path: the user stores a technical stack fact and recalls it in a new session."

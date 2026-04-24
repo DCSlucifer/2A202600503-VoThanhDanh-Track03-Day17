@@ -1,0 +1,16 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: day17-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  chroma:
+    image: chromadb/chroma:0.5.0
+    container_name: day17-chroma
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./outputs/chroma-server:/chroma/chroma
+    restart: unless-stopped

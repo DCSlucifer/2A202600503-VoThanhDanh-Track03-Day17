@@ -1,0 +1,25 @@
+id: s02_pref_cross_session
+title: "Preference cross-session recall (demo #1 and #2)"
+category: preference
+sessions:
+  - - turn_idx: 0
+      user: "Tôi thích Python, không thích Java."
+      expected_signals:
+        - "noting that preference"
+  - - turn_idx: 0
+      user: "Which language should I use for a simple script?"
+      expected_signals:
+        - "Python"
+        - "prefer"
+      negative_signals:
+        - "re:(?<!avoid )Java(?!Script)"
+    - turn_idx: 1
+      user: "Can you write the hello-world version for me?"
+      expected_signals:
+        - "Python"
+      negative_signals:
+        - "re:(?<!avoid )Java(?!Script)"
+oracle_preferences:
+  "language.liked": "python"
+  "language.disliked": "java"
+notes: "Proves cross-session recall — the second session has no buffer overlap."

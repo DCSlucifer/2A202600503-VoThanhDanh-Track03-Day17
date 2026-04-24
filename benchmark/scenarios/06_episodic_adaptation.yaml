@@ -1,0 +1,14 @@
+id: s06_episodic_adaptation
+title: "Episodic adaptation (demo #3 — async/await confusion)"
+category: experience
+sessions:
+  - - turn_idx: 0
+      user: "I'm confused about async/await in Python, I don't really get it."
+      expected_signals:
+        - "break"
+  - - turn_idx: 0
+      user: "Can you explain async/await again?"
+      expected_signals:
+        - "re:tricky|simpler|beginner|step by step|simple terms"
+      negative_signals: []
+notes: "After a prior confusion episode, agent must soften/simplify explanation."

@@ -1,0 +1,13 @@
+id: s08_precision
+title: "Irrelevant query — precision test"
+category: precision
+sessions:
+  - - turn_idx: 0
+      user: "Tôi thích Python."
+      expected_signals: []
+  - - turn_idx: 0
+      user: "What's the boiling point of water?"
+      expected_signals: []
+      negative_signals:
+        - "Python"
+notes: "Agent must NOT leak unrelated preferences into an off-topic question."

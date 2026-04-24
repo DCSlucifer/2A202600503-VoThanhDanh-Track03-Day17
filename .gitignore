@@ -1,0 +1,44 @@
+# Python caches and build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Virtual environments and local secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# IDE and local agent workspace
+.idea/
+.vscode/
+*.swp
+.claude/
+.codex/
+.tmp/
+
+# Generated runtime data
+outputs/**
+!outputs/
+!outputs/.gitkeep
+
+# Keep only the canonical submission benchmark outputs.
+!outputs/reports/
+!outputs/reports/run_20260424_121031_fb4011/
+!outputs/reports/run_20260424_121031_fb4011/**
+
+# Keep the raw run logs behind the canonical benchmark report for automated grading.
+!outputs/runs/
+!outputs/runs/run_20260424_121031_fb4011/
+!outputs/runs/run_20260424_121031_fb4011/**

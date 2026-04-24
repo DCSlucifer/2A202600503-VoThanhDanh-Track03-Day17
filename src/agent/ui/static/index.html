@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multi-Memory Agent Console</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --panel-2: #eef2f7;
+      --text: #19212a;
+      --muted: #647181;
+      --line: #d9e0ea;
+      --accent: #1565c0;
+      --accent-2: #0f8b6f;
+      --warn: #a15c00;
+      --bad: #b42318;
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 14px 22px; background: #122033; color: white; border-bottom: 3px solid #2f7dd3;
+    }
+    h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0; }
+    main { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; padding: 16px; }
+    section, aside { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+    aside { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+    .workspace { display: grid; gap: 16px; }
+    .band { padding: 14px; }
+    .title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    h2 { margin: 0; font-size: 15px; }
+    label { display: block; color: var(--muted); font-size: 12px; font-weight: 650; margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #fff;
+      padding: 9px 10px; color: var(--text); font: inherit; font-size: 14px;
+    }
+    textarea { min-height: 96px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+    button {
+      border: 1px solid #b7c5d8; background: #fff; color: var(--text);
+      border-radius: 6px; padding: 8px 10px; font-weight: 700; cursor: pointer;
+    }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button.success { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .toggle { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .toggle input { width: auto; }
+    .status { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px;
+      border-radius: 999px; background: var(--panel-2); color: #314154; font-size: 12px; font-weight: 700;
+    }
+    .pill.good { color: #05603a; background: #e7f6ef; }
+    .pill.warn { color: var(--warn); background: #fff4df; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; padding: 12px; }
+    .card h3 { margin: 0 0 8px; font-size: 14px; }
+    .response {
+      white-space: pre-wrap; line-height: 1.45; background: #fbfcfe; border: 1px solid #edf1f6;
+      border-radius: 6px; padding: 10px; min-height: 72px;
+    }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+    .metric { background: var(--panel-2); border-radius: 6px; padding: 8px; }
+    .metric b { display: block; font-size: 16px; }
+    .metric span { color: var(--muted); font-size: 11px; }
+    .timeline { display: grid; gap: 10px; }
+    .step { border-left: 3px solid var(--accent); padding: 8px 10px; background: #fbfcfe; border-radius: 0 6px 6px 0; }
+    pre { margin: 0; overflow: auto; white-space: pre-wrap; font-size: 12px; color: #263442; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 7px; text-align: left; }
+    th { color: var(--muted); }
+    .muted { color: var(--muted); }
+    .error { color: var(--bad); font-weight: 700; }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+      .grid-2, .row { grid-template-columns: 1fr; }
+      header { align-items: flex-start; flex-direction: column; }
+      .status { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Multi-Memory Agent Console</h1>
+    <div id="status" class="status"></div>
+  </header>
+
+  <main>
+    <aside>
+      <div>
+        <label for="userId">User</label>
+        <input id="userId" />
+      </div>
+      <div>
+        <label for="sessionId">Session</label>
+        <input id="sessionId" value="ui_s1" />
+      </div>
+      <label class="toggle">
+        <input id="memoryEnabled" type="checkbox" checked />
+        Memory enabled
+      </label>
+      <div>
+        <label for="message">Message</label>
+        <textarea id="message">Tôi thích Python, không thích Java.</textarea>
+      </div>
+      <div class="controls">
+        <button class="primary" id="askBtn">Ask</button>
+        <button class="success" id="compareBtn">Compare</button>
+        <button id="snapshotBtn">Memory</button>
+      </div>
+      <div>
+        <label>Scenario shortcuts</label>
+        <div class="controls">
+          <button data-msg="Tôi thích Python, không thích Java." data-session="s1">Preference write</button>
+          <button data-msg="Which language should I use for a simple script?" data-session="s2">Cross-session recall</button>
+          <button data-msg="I'm confused about async/await in Python, I don't really get it." data-session="s3a">Confusion</button>
+          <button data-msg="Can you explain async/await again?" data-session="s3b">Episode recall</button>
+        </div>
+      </div>
+      <button class="primary" id="demoBtn">Run full demo</button>
+      <div id="memoryBox" class="card"></div>
+    </aside>
+
+    <div class="workspace">
+      <section class="band">
+        <div class="title">
+          <h2>Latest Result</h2>
+          <span id="lastMeta" class="pill">idle</span>
+        </div>
+        <div id="singleResult" class="card muted">No turn yet.</div>
+      </section>
+
+      <section class="band">
+        <div class="title">
+          <h2>Memory vs No Memory</h2>
+          <span id="compareMeta" class="pill">not run</span>
+        </div>
+        <div id="compareResult" class="grid-2"></div>
+      </section>
+
+      <section class="band">
+        <div class="title">
+          <h2>Full Demo Timeline</h2>
+          <span id="demoMeta" class="pill">not run</span>
+        </div>
+        <div id="demoResult" class="timeline"></div>
+      </section>
+
+      <section class="band">
+        <div class="title">
+          <h2>Latest Benchmark Report</h2>
+          <button id="reportBtn">Refresh report</button>
+        </div>
+        <div id="reportBox" class="card muted">No report loaded.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const api = async (path, body) => {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {})
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || res.statusText);
+      return data;
+    };
+    const getJson = async (path) => (await fetch(path)).json();
+    const user = () => $('userId').value.trim();
+    const session = () => $('sessionId').value.trim();
+    const message = () => $('message').value;
+    const setBusy = (busy) => document.querySelectorAll('button').forEach(b => b.disabled = busy);
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+
+    function turnCard(title, r) {
+      const errors = (r.errors || []).length ? `<div class="error">Errors: ${esc(JSON.stringify(r.errors))}</div>` : '';
+      return `<div class="card">
+        <h3>${esc(title)}</h3>
+        <div class="response">${esc(r.assistant_response)}</div>
+        ${errors}
+        <div class="metrics">
+          <div class="metric"><b>${esc(r.router.top_intent)}</b><span>top intent</span></div>
+          <div class="metric"><b>${Object.values(r.recall_counts).reduce((a,b)=>a+b,0)}</b><span>recall items</span></div>
+          <div class="metric"><b>${r.usage.prompt_tokens || 0}</b><span>prompt tokens</span></div>
+          <div class="metric"><b>${r.context.total_tokens || 0}</b><span>context tokens</span></div>
+        </div>
+        <p class="muted">Backends: ${(r.router.backends || []).map(esc).join(', ') || 'none'} · Persisted: ${esc(JSON.stringify(r.persisted))}</p>
+      </div>`;
+    }
+
+    async function loadConfig() {
+      const c = await getJson('/api/config');
+      $('userId').value = `ui_${new Date().toISOString().slice(11,19).replaceAll(':','')}`;
+      $('status').innerHTML = [
+        `runtime ${c.runtime}`,
+        `model ${c.model}`,
+        `embedding ${c.embedding}`,
+        c.fake_redis ? 'fake redis' : 'redis',
+        c.ephemeral_chroma ? 'ephemeral chroma' : 'persistent chroma'
+      ].map(x => `<span class="pill">${esc(x)}</span>`).join('');
+    }
+
+    async function ask() {
+      setBusy(true);
+      try {
+        const result = await api('/api/ask', {
+          message: message(),
+          user_id: user(),
+          session_id: session(),
+          memory_enabled: $('memoryEnabled').checked
+        });
+        $('singleResult').className = 'card';
+        $('singleResult').innerHTML = turnCard('Agent response', result);
+        $('lastMeta').textContent = result.memory_enabled ? 'with memory' : 'no memory';
+      } catch (err) {
+        $('singleResult').innerHTML = `<span class="error">${esc(err.message)}</span>`;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function compare() {
+      setBusy(true);
+      try {
+        const result = await api('/api/compare', {
+          message: message(),
+          user_id: user(),
+          session_id: session() || 'compare'
+        });
+        $('compareResult').innerHTML =
+          turnCard('With memory', result.with_memory) +
+          turnCard('Without memory', result.without_memory);
+        $('compareMeta').textContent = `delta recall ${result.delta.recall_items}, tokens ${result.delta.prompt_tokens}`;
+      } catch (err) {
+        $('compareResult').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function fullDemo() {
+      setBusy(true);
+      try {
+        const result = await api('/api/demo/full', { user_id: user() });
+        $('demoResult').innerHTML = result.steps.map(s =>
+          `<div class="step"><b>${esc(s.label)}</b>${turnCard('', s.result)}</div>`
+        ).join('');
+        $('compareResult').innerHTML =
+          turnCard('Language: with memory', result.comparisons.language.with_memory) +
+          turnCard('Language: without memory', result.comparisons.language.without_memory) +
+          turnCard('Async: with memory', result.comparisons.async.with_memory) +
+          turnCard('Async: without memory', result.comparisons.async.without_memory);
+        $('demoMeta').textContent = result.user_id;
+        renderMemory(result.memory);
+      } catch (err) {
+        $('demoResult').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function snapshot() {
+      const data = await getJson(`/api/memory?user_id=${encodeURIComponent(user())}`);
+      renderMemory(data);
+    }
+    function renderMemory(data) {
+      const prefs = data.preferences || [];
+      const facts = data.facts || [];
+      const episodes = data.episodes || [];
+      $('memoryBox').innerHTML = `<h3>Memory snapshot</h3>
+        <p class="muted">${prefs.length} prefs · ${facts.length} facts · ${episodes.length} recent episodes · ${data.semantic_count || 0} semantic chunks</p>
+        <pre>${esc(JSON.stringify({preferences: prefs, facts, episodes}, null, 2))}</pre>`;
+    }
+
+    async function loadReport() {
+      const data = await getJson('/api/report/latest');
+      if (!data.available) {
+        $('reportBox').textContent = 'No benchmark report found.';
+        return;
+      }
+      const rows = (data.summary.scenarios || []).map(s =>
+        `<tr><td>${esc(s.id)}</td><td>${esc(s.with_mem.user_satisfaction_proxy)}</td><td>${esc(s.no_mem.user_satisfaction_proxy)}</td><td>${esc(s.deltas.user_satisfaction_proxy)}</td></tr>`
+      ).join('');
+      $('reportBox').className = 'card';
+      $('reportBox').innerHTML = `<p><b>${esc(data.run_id)}</b></p>
+        <table><thead><tr><th>Scenario</th><th>With</th><th>No</th><th>Delta</th></tr></thead><tbody>${rows}</tbody></table>
+        <p class="muted">Report: ${esc(data.paths.report)}</p>`;
+    }
+
+    document.querySelectorAll('[data-msg]').forEach(btn => btn.addEventListener('click', () => {
+      $('message').value = btn.dataset.msg;
+      $('sessionId').value = btn.dataset.session;
+    }));
+    $('askBtn').addEventListener('click', ask);
+    $('compareBtn').addEventListener('click', compare);
+    $('demoBtn').addEventListener('click', fullDemo);
+    $('snapshotBtn').addEventListener('click', snapshot);
+    $('reportBtn').addEventListener('click', loadReport);
+    loadConfig().then(loadReport);
+  </script>
+</body>
+</html>

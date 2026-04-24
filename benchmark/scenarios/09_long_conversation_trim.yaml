@@ -1,0 +1,37 @@
+id: s09_long_trim
+title: "Long conversation → context trim"
+category: context
+sessions:
+  - - turn_idx: 0
+      user: "Tôi thích Python."
+      expected_signals: []
+    - turn_idx: 1
+      user: "Let's talk about data structures for a while."
+      expected_signals: []
+    - turn_idx: 2
+      user: "Tell me about lists."
+      expected_signals: []
+    - turn_idx: 3
+      user: "Tell me about dicts."
+      expected_signals: []
+    - turn_idx: 4
+      user: "Tell me about sets."
+      expected_signals: []
+    - turn_idx: 5
+      user: "Tell me about tuples."
+      expected_signals: []
+    - turn_idx: 6
+      user: "Tell me about deques."
+      expected_signals: []
+    - turn_idx: 7
+      user: "Tell me about heaps."
+      expected_signals: []
+    - turn_idx: 8
+      user: "Tell me about trees."
+      expected_signals: []
+    - turn_idx: 9
+      user: "Which language should I pick for implementing a tree?"
+      expected_signals:
+        - "Python"
+      negative_signals: []
+notes: "Preference should survive many noisy turns; context manager trims buffer but keeps pinned preference."

@@ -1,0 +1,16 @@
+id: s07_ambiguous_multi
+title: "Ambiguous intent — multi-memory recall"
+category: routing
+sessions:
+  - - turn_idx: 0
+      user: "Tôi thích Python."
+      expected_signals: []
+    - turn_idx: 1
+      user: "Also, I was confused about decorators once."
+      expected_signals: []
+  - - turn_idx: 0
+      user: "Remind me what I prefer and what tripped me up before."
+      expected_signals:
+        - "Python"
+      negative_signals: []
+notes: "Router should fan out to preference + episodic backends."

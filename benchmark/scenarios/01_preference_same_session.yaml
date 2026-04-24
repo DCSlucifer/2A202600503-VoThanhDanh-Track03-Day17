@@ -1,0 +1,18 @@
+id: s01_pref_same_session
+title: "Preference capture + same-session use"
+category: preference
+sessions:
+  - - turn_idx: 0
+      user: "Tôi thích Python."
+      expected_signals:
+        - "noting that preference"
+    - turn_idx: 1
+      user: "Which language should I use for a short web-scraper script?"
+      expected_signals:
+        - "Python"
+        - "prefer"
+      negative_signals:
+        - "Java"
+oracle_preferences:
+  "language.liked": "python"
+notes: "Covers the minimal write→read loop within a single session."

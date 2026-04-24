@@ -1,0 +1,21 @@
+id: s04_fact_profile
+title: "Factual recall - profile allergy correction"
+category: factual
+sessions:
+  - - turn_idx: 0
+      user: "Tôi dị ứng sữa bò."
+      expected_signals:
+        - "noting that fact"
+  - - turn_idx: 0
+      user: "À nhầm, tôi dị ứng đậu nành chứ không phải sữa bò."
+      expected_signals:
+        - "noting that fact"
+    - turn_idx: 1
+      user: "Tôi dị ứng gì?"
+      expected_signals:
+        - "đậu nành"
+      negative_signals:
+        - "sữa bò"
+oracle_facts:
+  "profile.allergy": "đậu nành"
+notes: "Required rubric case: old allergy fact is corrected, and the latest fact wins without keeping a contradictory active profile value."

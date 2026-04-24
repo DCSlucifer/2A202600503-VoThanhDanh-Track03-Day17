@@ -1,0 +1,59 @@
+# Default configuration for the multi-memory agent.
+# Override via environment variables with prefix AGENT_ (e.g. AGENT_RUNTIME_MODE=mock).
+
+runtime:
+  mode: mock            # mock | openai
+  model: gpt-4o-mini
+  temperature: 0.0
+  max_tokens: 512
+  seed: 17
+
+embedding:
+  mode: hash            # hash (deterministic, for tests) | openai
+  model: text-embedding-3-small
+  dim: 128              # only used when mode=hash
+
+user:
+  default_user_id: demo_user
+
+context:
+  budget_tokens: 8000
+  response_headroom_tokens: 800
+  split:
+    l0: 0.15
+    l1: 0.35
+    l2: 0.35
+    l3: 0.05
+  weights:
+    level: 1.0
+    recency: 0.3
+    relevance: 0.7
+    pin: 0.5
+  recency_tau_hours: 72
+  buffer_recent_turns: 6
+
+router:
+  high_confidence_threshold: 0.8
+  medium_confidence_threshold: 0.4
+  fallback_top_k: 5
+  max_backends_per_turn: 3
+
+memory:
+  extraction_mode: rules   # rules | llm
+  buffer:
+    max_turns: 12
+  redis:
+    url_env: REDIS_URL
+    key_prefix: "agent"
+    fact_default_ttl_days: 90
+  episodic:
+    log_dir: ./outputs/episodic
+  semantic:
+    persist_dir: ./outputs/chroma
+    collection: semantic_memory
+    distilled_top_k: 6
+
+benchmark:
+  run_dir: ./outputs/runs
+  report_dir: ./outputs/reports
+  scenarios_dir: ./benchmark/scenarios
