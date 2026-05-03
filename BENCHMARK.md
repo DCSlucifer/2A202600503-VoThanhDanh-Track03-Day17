@@ -62,15 +62,15 @@ Benchmark báo cáo:
 - Theo giai thoại (Episodic): Log JSONL với các thẻ sự kiện đáng chú ý như `confusion` (nhầm lẫn).
 - Ngữ nghĩa (Semantic): Chỉ mục vector Chroma cho các sở thích, sự kiện đã được chắt lọc, và các giai thoại đáng chú ý.
 
-## Phản ánh về Quyền riêng tư
+## Phản ánh về Quyền riêng tư (Privacy Reflection)
 
-Bộ nhớ nhạy cảm nhất là hồ sơ dài hạn vì nó có thể chứa PII (Thông tin nhận dạng cá nhân) hoặc các thuộc tính người dùng riêng tư như tên, dị ứng, vai trò, công ty, dự án, và tech stack. Bộ nhớ theo giai thoại cũng rủi ro vì nó có thể lưu lại sự nhầm lẫn của người dùng, lỗi hoặc ngữ cảnh làm việc.
+Bộ nhớ nhạy cảm nhất là hồ sơ dài hạn vì nó có thể chứa **PII** (Personally Identifiable Information — thông tin nhận dạng cá nhân) hoặc các thuộc tính người dùng riêng tư như tên, dị ứng, vai trò, công ty, dự án, và tech stack. Bộ nhớ theo giai thoại cũng rủi ro về **privacy** vì nó có thể lưu lại sự nhầm lẫn của người dùng, lỗi hoặc ngữ cảnh làm việc.
 
-Hệ thống cần yêu cầu sự đồng ý trước khi lưu trữ các sự kiện hồ sơ nhạy cảm trong môi trường production. Các sự kiện hồ sơ trên Redis có hỗ trợ TTL (thời gian sống), và việc xóa cấp độ người dùng có thể thực hiện thông qua `RedisMemory.clear_user(user_id)`. Bộ nhớ ngữ nghĩa hỗ trợ xóa theo người dùng với `SemanticMemory.delete(user_id=...)`. Bộ nhớ đệm ngắn hạn có phạm vi theo phiên và có thể xóa theo từng phiên. File JSONL theo giai thoại chỉ cho phép ghi thêm (append-only) trong bài lab này, vì vậy việc xóa trong môi trường production sẽ cần một job thu gọn (compaction) hoặc bôi đen/xóa thông tin nhạy cảm (redaction); đây là hạn chế rõ ràng nhất về quyền riêng tư.
+Hệ thống cần yêu cầu sự đồng ý trước khi lưu trữ các sự kiện hồ sơ nhạy cảm trong môi trường production. Các sự kiện hồ sơ trên Redis có hỗ trợ **TTL** (Time To Live — thời gian sống), và việc xóa (**deletion**) cấp độ người dùng có thể thực hiện thông qua `RedisMemory.clear_user(user_id)`. Bộ nhớ ngữ nghĩa hỗ trợ xóa theo người dùng với `SemanticMemory.delete(user_id=...)`. Bộ nhớ đệm ngắn hạn có phạm vi theo phiên và có thể xóa theo từng phiên. File JSONL theo giai thoại chỉ cho phép ghi thêm (append-only) trong bài lab này, vì vậy việc xóa trong môi trường production sẽ cần một job thu gọn (compaction) hoặc bôi đen/xóa thông tin nhạy cảm (redaction); đây là **limitation** (hạn chế) rõ ràng nhất về quyền riêng tư.
 
-Lỗi truy xuất là một rủi ro quyền riêng tư khác: nếu độ chính xác của router kém, tác nhân (agent) có thể chèn các chi tiết cá nhân không liên quan vào những câu trả lời không liên quan. Kịch bản 8 kiểm tra điều này bằng cách đặt một câu hỏi không liên quan sau khi đã có sở thích được lưu.
+Lỗi truy xuất là một rủi ro privacy khác: nếu độ chính xác của router kém, tác nhân (agent) có thể chèn các chi tiết cá nhân không liên quan (PII leakage) vào những câu trả lời không liên quan. Kịch bản 8 kiểm tra điều này bằng cách đặt một câu hỏi không liên quan sau khi đã có sở thích được lưu.
 
-## Hạn chế Kỹ thuật
+## Hạn chế Kỹ thuật (Limitations)
 
 - Việc trích xuất sự kiện và sở thích dựa trên regex, do đó việc gợi nhớ đáng tin cậy trong các bài test benchmark nhưng sẽ bỏ sót nhiều cách diễn đạt khác nhau (paraphrase).
 - Chroma lưu trữ các sự kiện đã được chắt lọc và các giai thoại đáng chú ý, chứ không phải các lượt hội thoại thô; điều này làm giảm rủi ro về quyền riêng tư nhưng có thể làm giảm chi tiết gợi nhớ.

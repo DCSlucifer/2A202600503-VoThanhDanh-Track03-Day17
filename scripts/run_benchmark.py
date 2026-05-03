@@ -28,6 +28,13 @@ def main() -> int:
     os.environ.setdefault("AGENT_USE_FAKE_REDIS", "true")
     os.environ.setdefault("AGENT_USE_EPHEMERAL_CHROMA", "true")
 
+    # Mock runtime is for deterministic reproducible benchmarks — force isolated
+    # backends so leftover state from prior real-LLM runs (e.g. Chroma collection
+    # dim mismatch, stale Redis, stopped Docker) cannot poison the result.
+    if os.environ.get("AGENT_RUNTIME__MODE", "").lower() == "mock":
+        os.environ["AGENT_USE_FAKE_REDIS"] = "true"
+        os.environ["AGENT_USE_EPHEMERAL_CHROMA"] = "true"
+
     reset_settings()
     settings = get_settings()
 

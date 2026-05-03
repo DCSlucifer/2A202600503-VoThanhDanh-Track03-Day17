@@ -101,13 +101,11 @@ class MemoryRouter:
             key=lambda x: -x.score,
         )
 
-        backends = self._backends_for(intents)
+        backends, fallback_used = self._backends_for(intents)
 
         # hard cap
         if len(backends) > self.cfg.max_backends_per_turn:
             backends = backends[: self.cfg.max_backends_per_turn]
-
-        fallback_used = False
 
         elapsed = (time.perf_counter() - t0) * 1000.0
 
@@ -120,19 +118,22 @@ class MemoryRouter:
             matched_rules=matched,
         )
 
-    def _backends_for(self, intents: list[IntentScore]) -> list[BackendName]:
+    def _backends_for(self, intents: list[IntentScore]) -> tuple[list[BackendName], bool]:
         hi = self.cfg.high_confidence_threshold
         mid = self.cfg.medium_confidence_threshold
         chosen: list[BackendName] = ["buffer"]  # buffer always included
+        fallback_used = False
 
         top = intents[0] if intents else None
         if top is None:
-            return chosen
+            return chosen, fallback_used
 
         def add(*bs: BackendName) -> None:
             for b in bs:
                 if b not in chosen:
                     chosen.append(b)
+
+        write_only = {"preference_capture", "fact_capture"}
 
         if top.score >= hi:
             if top.name == "preference_recall":
@@ -141,11 +142,8 @@ class MemoryRouter:
                 add("redis_fact", "semantic")
             elif top.name == "experience_recall":
                 add("episodic", "semantic")
-            elif top.name == "preference_capture":
-                # no read needed; keep buffer
-                pass
-            elif top.name == "fact_capture":
-                # no read needed; persist node extracts facts after the response
+            elif top.name in write_only:
+                # no read needed; persist node extracts after the response
                 pass
             else:  # task_default
                 add("semantic")
@@ -160,13 +158,17 @@ class MemoryRouter:
                     add("redis_fact", "semantic")
                 elif intent == "experience_recall":
                     add("episodic", "semantic")
-                elif intent == "fact_capture":
+                elif intent in write_only:
                     pass
                 elif intent == "task_default":
                     add("semantic")
         else:
-            # Plain task-default turns should not pull unrelated long-term memory.
-            # Explicit recall intents above opt into Redis/episodic/semantic.
-            pass
+            # §4.2 rule 3 + §4.3 None: pure task / no clear intent → still buffer
+            # plus a Chroma warm-up so cross-session preferences can surface
+            # even when the user does not explicitly ask. Skip warm-up only when
+            # the dominant intent is purely a write (capture).
+            if top.name not in write_only:
+                add("semantic")
+                fallback_used = True
 
-        return chosen
+        return chosen, fallback_used

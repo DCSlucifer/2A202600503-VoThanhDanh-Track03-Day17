@@ -164,6 +164,40 @@ class AgentUiService:
             "semantic_count": semantic_count,
         }
 
+    def clear_user_memory(self, user_id: str) -> dict[str, Any]:
+        """Wipe all 4 memory layers for a user. Useful for cold-start testing."""
+        self.ctx.redis.clear_user(user_id)
+        self.ctx.buffer.delete()  # clear all sessions
+        self.ctx.episodic.clear()
+        self.ctx.semantic.delete(user_id=user_id)
+        return {"cleared": True, "user_id": user_id}
+
+    def batch_ask(
+        self,
+        messages: list[str],
+        user_id: str,
+        session_id: str,
+        memory_enabled: bool = True,
+    ) -> dict[str, Any]:
+        """Send multiple messages in sequence. Returns all turn results."""
+        results: list[dict[str, Any]] = []
+        for i, msg in enumerate(messages):
+            r = self.ask(
+                message=msg,
+                user_id=user_id,
+                session_id=session_id,
+                memory_enabled=memory_enabled,
+                scenario_id="ui_batch",
+                session_idx=i,
+            )
+            results.append(r)
+        return {
+            "user_id": user_id,
+            "session_id": session_id,
+            "total_turns": len(results),
+            "results": results,
+        }
+
     def latest_report(self) -> dict[str, Any]:
         reports_root = Path(self.settings.benchmark.report_dir)
         runs = sorted(
@@ -273,7 +307,8 @@ def run_server(host: str = "127.0.0.1", port: int = 8765) -> None:
                 self._serve_file(STATIC_DIR / "index.html")
                 return
             if parsed.path.startswith("/static/"):
-                self._serve_file(STATIC_DIR / parsed.path.removeprefix("/static/"))
+                rel = parsed.path.removeprefix("/static/")
+                self._serve_file(STATIC_DIR / rel)
                 return
             if parsed.path == "/api/config":
                 self._json(service.config())
@@ -308,6 +343,19 @@ def run_server(host: str = "127.0.0.1", port: int = 8765) -> None:
                     return
                 if parsed.path == "/api/demo/full":
                     self._json(service.run_full_demo(body.get("user_id") or None))
+                    return
+                if parsed.path == "/api/memory/clear":
+                    self._json(service.clear_user_memory(
+                        user_id=body.get("user_id", ""),
+                    ))
+                    return
+                if parsed.path == "/api/batch":
+                    self._json(service.batch_ask(
+                        messages=body.get("messages", []),
+                        user_id=body.get("user_id", ""),
+                        session_id=body.get("session_id", "batch"),
+                        memory_enabled=body.get("memory_enabled", True),
+                    ))
                     return
             except Exception as exc:
                 self._json({"error": str(exc)}, status=500)

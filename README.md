@@ -192,26 +192,145 @@ Một số số liệu thật từ report:
 
 Ghi chú: benchmark mặc định vẫn dùng rule extractor để deterministic. LLM extractor là optional qua config `memory.extraction_mode: llm`.
 
-## UI demo
+## UI Test Console — Professional Testing Interface
 
-Tôi có thêm UI local để test trực quan:
+### Kiến trúc UI
+
+UI được thiết kế theo kiến trúc 3 file tách biệt, chuyên nghiệp:
+
+| File | Chức năng | Mô tả |
+|---|---|---|
+| `src/agent/ui/static/index.html` | HTML structure | Cấu trúc semantic, layout 2 cột (sidebar + workspace) |
+| `src/agent/ui/static/style.css` | Design system | Dark theme, CSS variables, Inter font, glassmorphism, animations |
+| `src/agent/ui/static/app.js` | Logic + Rendering | API calls, turn card rendering, smart annotations, scenario management |
+| `src/agent/ui/app.py` | Backend API | 7 endpoints, `AgentUiService` class, HTTP server |
+
+### Cách chạy UI
+
+Chạy với mock runtime (không cần API key, deterministic):
 
 ```powershell
+$env:PYTHONIOENCODING="utf-8"
+$env:AGENT_RUNTIME__MODE="mock"
+$env:AGENT_EMBEDDING__MODE="hash"
+$env:AGENT_USE_FAKE_REDIS="true"
+$env:AGENT_USE_EPHEMERAL_CHROMA="true"
 .\.venv\Scripts\python -m scripts.run_ui --host 127.0.0.1 --port 8765
 ```
 
-UI cho phép:
+Chạy với OpenAI thật (cần `.env` có `OPENAI_API_KEY`):
 
-- Chat với memory on/off.
-- Compare response `with memory` vs `without memory`.
-- Run full demo 3 session: preference write, cross-session recall, episodic recall.
-- Xem memory snapshot và latest benchmark report.
+```powershell
+docker compose up -d redis
+$env:AGENT_RUNTIME__MODE="openai"
+$env:AGENT_EMBEDDING__MODE="openai"
+$env:AGENT_USE_FAKE_REDIS="false"
+$env:REDIS_URL="redis://localhost:6379/0"
+.\.venv\Scripts\python -m scripts.run_ui --host 127.0.0.1 --port 8765
+```
 
-Evidence:
+Sau khi chạy, mở browser tại `http://127.0.0.1:8765`.
 
-- `src/agent/ui/app.py`
-- `src/agent/ui/static/index.html`
-- `tests/unit/test_ui_service.py`
+### 7 chế độ tương tác
+
+| # | Nút bấm | Chức năng | Test case tương ứng |
+|---:|---|---|---|
+| 1 | **▶ Send Message** | Gửi 1 tin nhắn tới agent. Hiển thị response, intent routing, recall count, prompt tokens, context levels (L0-L3), và backends routed. Toggle memory on/off qua switch. | Tất cả scenarios |
+| 2 | **⚖ A/B Compare** | Gửi cùng 1 tin nhắn 2 lần: 1 lần có memory, 1 lần không. Hiển thị song song 2 card (xanh = memory ON, đỏ = memory OFF) với delta items recalled và delta tokens. | S01–S06, S08 |
+| 3 | **🚀 Full Demo** | Chạy tự động 4 bước lifecycle: preference write → cross-session recall → episode log → episode recall. Sau đó chạy 2 A/B comparison tự động. Mỗi bước có annotation giải thích. | S01, S02, S06 |
+| 4 | **👁 Memory State** | Mở modal hiển thị snapshot toàn bộ 4 memory layers: preferences (Redis), facts (Redis), episodes (JSONL), semantic chunk count (ChromaDB). | Kiểm tra persistence |
+| 5 | **🗑 Clear Memory** | Xóa sạch cả 4 memory layers cho user hiện tại. Dùng để test cold-start behavior. Có confirm dialog. | S10 (Cold Start) |
+| 6 | **📊 Batch / Stress Test** | Gửi 20+ messages liên tục qua 1 lần click. Preset 20 messages bao phủ preference, fact, episode, correction, precision, recall. Hiển thị timeline với context trimming detection. | S09 (Long Conversation Trim) |
+| 7 | **↻ Refresh (Benchmark)** | Load benchmark report mới nhất từ `outputs/reports/`. Hiển thị bảng scenario với cột With Mem / No Mem / Delta / PASS/FAIL. | S01–S10 |
+
+### 10 Quick Scenario chips
+
+Sidebar có 10 chip bấm nhanh, mỗi chip tự động điền message và session ID:
+
+| Chip | Message | Scenario | Memory layer |
+|---|---|---|---|
+| Add Preference | `Tôi thích Python, không thích Java.` | S01 | Redis preference |
+| Query Preference | `Which language should I use for a simple script?` | S02 | Redis preference recall |
+| Pref Conflict | `Actually I prefer Rust now.` | S03 | Contradiction override |
+| Fact Write | `Tôi dị ứng sữa bò.` | S04 | Redis fact |
+| Fact Correction | `À nhầm, tôi dị ứng đậu nành chứ không phải sữa bò.` | S04 | Fact conflict |
+| Fact Recall | `Tôi dị ứng gì?` | S04 | Redis fact recall |
+| Tech Stack | `I'm using Postgres 15 for this project.` | S05 | Technical fact |
+| Precision | `What is the capital of France?` | S08 | No PII leakage |
+| Log Episode | `I'm confused about async/await in Python, I don't really get it.` | S06 | Episodic write |
+| Recall Episode | `Can you explain async/await again?` | S06 | Episodic recall |
+
+### Smart Analysis Annotations
+
+Mỗi kết quả đều có annotation tự động phân tích:
+
+- **Khi memory recalled > 0**: annotation xanh giải thích agent đã dùng bao nhiêu items recalled, intent gì, và memory giúp personalize response thế nào.
+- **Khi memory enabled nhưng recalled = 0**: annotation vàng giải thích có thể là cold start, câu hỏi general knowledge, hoặc intent không cần memory.
+- **Khi memory disabled**: annotation giải thích agent chỉ dùng current message, gợi ý so sánh với memory on.
+- **A/B Compare**: annotation phân tích delta giữa 2 mode, highlight sự khác biệt.
+- **Batch test**: annotation tự động phát hiện context trimming (Scenario 09).
+
+### Context Window Visualization
+
+Mỗi turn card hiển thị:
+
+- **Tokens per level**: `L0:75 L1:0 L2:54 L3:0` — cho thấy prompt budget allocation.
+- **Degraded flag**: `✓ OK` (xanh) hoặc `⚠ TRIMMED` (đỏ) — cho biết context có bị cắt không.
+- **Prompt tokens**: tổng tokens gửi tới LLM.
+- **Context tokens**: tổng tokens trong context pack.
+
+### Hướng dẫn test từng tính năng
+
+**Test preference lifecycle (S01 → S02 → S03):**
+
+1. Click chip **Add Preference** → bấm **▶ Send**. Xem intent = `preference_capture`, writes P:2.
+2. Click chip **Query Preference** → bấm **⚖ A/B Compare**. With-memory card hiển thị "Python", no-memory card hỏi lại.
+3. Click chip **Pref Conflict** → bấm **▶ Send**. Xem intent = `preference_capture`, Rust ghi đè Python.
+
+**Test fact correction (S04):**
+
+1. Click chip **Fact Write** → **▶ Send**. Agent ghi dị ứng sữa bò.
+2. Click chip **Fact Correction** → **▶ Send**. Agent ghi correction đậu nành.
+3. Click chip **Fact Recall** → **⚖ A/B Compare**. With-memory: "đậu nành". No-memory: không biết.
+
+**Test episodic adaptation (S06):**
+
+1. Click chip **Log Episode** → **▶ Send**. Agent detect confusion, log episode.
+2. Click chip **Recall Episode** → **⚖ A/B Compare**. With-memory: giải thích đơn giản hơn. No-memory: generic.
+
+**Test precision / no PII leakage (S08):**
+
+1. Đảm bảo đã có preferences/facts từ các bước trên.
+2. Click chip **Precision** → **⚖ A/B Compare**. Cả 2 mode đều trả lời "Paris" mà không inject sở thích không liên quan.
+
+**Test context window trimming (S09):**
+
+1. Bấm **📊 Batch / Stress Test**. Giữ nguyên 20 messages mặc định, bấm OK.
+2. Xem timeline kết quả. Nếu có turn nào hiển thị `⚠ TRIMMED`, context budget đã trigger L3→L2 degradation.
+
+**Test cold start (S10):**
+
+1. Bấm **🗑 Clear Memory**. Confirm.
+2. Bấm chip **Query Preference** → **▶ Send**. Agent không biết sở thích nào → hoạt động gracefully.
+
+### API endpoints
+
+| Endpoint | Method | Mô tả |
+|---|---|---|
+| `/api/ask` | POST | Gửi 1 message, nhận response + metrics |
+| `/api/compare` | POST | Gửi 1 message, nhận A/B compare with/without memory |
+| `/api/demo/full` | POST | Chạy full demo 4 bước + 2 A/B tests |
+| `/api/memory` | GET | Xem memory snapshot (preferences, facts, episodes, semantic count) |
+| `/api/memory/clear` | POST | Xóa toàn bộ memory của 1 user |
+| `/api/batch` | POST | Gửi batch messages liên tục (stress test) |
+| `/api/config` | GET | Xem runtime config |
+| `/api/report/latest` | GET | Lấy benchmark report mới nhất |
+
+### Evidence
+
+- Backend: `src/agent/ui/app.py`
+- Frontend: `src/agent/ui/static/index.html`, `src/agent/ui/static/style.css`, `src/agent/ui/static/app.js`
+- Tests: `tests/unit/test_ui_service.py`
 
 ## Cách chạy
 

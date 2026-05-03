@@ -55,12 +55,18 @@ def test_experience_recall_selects_episodic():
     assert "episodic" in d.backends
 
 
-def test_task_default_does_not_fetch_semantic_for_unrelated_question():
+def test_task_default_uses_semantic_warmup_with_fallback_flag():
+    """Per plan §4.3, low-confidence task turns still pull a Chroma warm-up so
+    cross-session preferences can surface even when not asked. Precision is the
+    job of the LLM + negative-signal benchmark, not the router."""
     r = _router()
     d = r.route("What's the boiling point of water?")
     assert "buffer" in d.backends
-    assert "semantic" not in d.backends
-    assert d.fallback_used is False
+    assert "semantic" in d.backends
+    assert d.fallback_used is True
+    # but never long-term redis when not explicitly asked
+    assert "redis_pref" not in d.backends
+    assert "redis_fact" not in d.backends
 
 
 def test_max_backends_cap():
